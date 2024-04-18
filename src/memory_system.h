@@ -41,6 +41,7 @@ enum cache_status {
 struct cache_line {
     uint32_t tag;
     enum cache_status status;
+    uint32_t last_used;
 };
 
 // This is a linked list struct for the hash table to keep track of what lines
@@ -63,6 +64,7 @@ struct cache_system {
 
     // Masks and shifts
     uint32_t offset_mask, set_index_mask;
+    uint32_t time;
 
     // Store the hash table as an array of linked lists.
     struct accessed_line **accessed_lines_hashtable;

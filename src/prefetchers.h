@@ -50,10 +50,20 @@ struct prefetcher {
     void *data;
 };
 
+
 // Constructors for each of the replacement policies.
 struct prefetcher *null_prefetcher_new();
 struct prefetcher *adjacent_prefetcher_new();
 struct prefetcher *sequential_prefetcher_new(uint32_t prefetch_amount);
 struct prefetcher *custom_prefetcher_new();
+
+struct prefetcher_args {
+    uint32_t prefetch_amount;
+};
+struct custom_prefetcher_data {
+    int32_t last_last_jump; //size of 2nd to last jump in memory address
+    int32_t last_jump; //size of last jump in memory address
+    uint32_t last_address;
+};
 
 #endif

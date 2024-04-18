@@ -66,7 +66,6 @@ struct replacement_policy {
 // Constructors for each of the replacement policies.
 struct replacement_policy *lru_replacement_policy_new(uint32_t sets, uint32_t associativity);
 struct replacement_policy *rand_replacement_policy_new(uint32_t sets, uint32_t associativity);
-struct replacement_policy *lru_prefer_clean_replacement_policy_new(uint32_t sets,
-                                                                   uint32_t associativity);
+struct replacement_policy *lru_prefer_clean_replacement_policy_new(uint32_t sets, uint32_t associativity);
 
 #endif

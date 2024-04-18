@@ -13,11 +13,11 @@ struct cache_system *cache_system_new(uint32_t line_size, uint32_t sets, uint32_
     cs->associativity = associativity;
     struct cache_system_stats stats = {0, 0, 0, 0, 0, 0, 0};
     cs->stats = stats;
+    cs->time = 0;
 
-    // TODO: calculate the index bits, offset bits and tag bits.
-    cs->index_bits = 0;
-    cs->offset_bits = 0;
-    cs->tag_bits = 0;
+    cs->index_bits = ceil(log2(sets));
+    cs->offset_bits = ceil(log2(line_size));
+    cs->tag_bits = 32 - (cs->index_bits) - (cs->offset_bits);
 
     cs->offset_mask = 0xffffffff >> (32 - cs->offset_bits);
     cs->set_index_mask = 0xffffffff >> cs->tag_bits;
@@ -48,6 +48,10 @@ void cache_system_cleanup(struct cache_system *cache_system)
     free(cache_system->cache_lines);
     cache_system->replacement_policy->cleanup(cache_system->replacement_policy);
     free(cache_system->replacement_policy);
+    for(int i = 0; i < ACCESSED_HASHTABLE_SIZE ; i++) {
+        free(cache_system->accessed_lines_hashtable[i]);
+    }
+    free(cache_system->accessed_lines_hashtable);
 }
 
 int cache_system_mem_access(struct cache_system *cache_system, uint32_t address, char rw,
@@ -149,7 +153,6 @@ void cache_system_line_id_add(struct cache_system *cache_system, uint32_t line_i
     struct accessed_line *new_accessed = malloc(sizeof(struct accessed_line));
     new_accessed->line_id = line_id;
     new_accessed->next = cache_system->accessed_lines_hashtable[hashtable_idx];
-
     cache_system->accessed_lines_hashtable[hashtable_idx] = new_accessed;
 }
 
@@ -169,8 +172,14 @@ bool cache_system_line_in_accessed_set(struct cache_system *cache_system, uint32
 struct cache_line *cache_system_find_cache_line(struct cache_system *cache_system, uint32_t set_idx,
                                                 uint32_t tag)
 {
-    // TODO Return a pointer to the cache line within the given set that has
+    // DONE Return a pointer to the cache line within the given set that has
     // the given tag. If no such element exists, then return NULL.
-
+    int start = set_idx * cache_system->associativity;
+    for(int i = 0; i < cache_system->associativity; i++) {
+        struct cache_line *cl = &(cache_system->cache_lines[start+i]);
+        if(cl->tag == tag) {
+            return cl;
+        }
+    }
     return NULL;
 }
